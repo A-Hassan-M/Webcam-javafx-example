@@ -1,6 +1,11 @@
 package sample;
 
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +18,9 @@ public class UserModel {
     public static void insert(User user){
         try {
             int id = getLastUserId();
-            File dataFile = new File("/home/ahmed/IdeaProjects/Data");
+            File dataFile = new File("./Data");
             dataFile.mkdir();
-            FileWriter fStream = new FileWriter("/home/ahmed/IdeaProjects/Data/data.txt",true);
+            FileWriter fStream = new FileWriter("./Data/users.txt",true);
             BufferedWriter out = new BufferedWriter(fStream);
             out.write((id+1) +","+user.toString()+"\n");
             out.close();
@@ -27,7 +32,7 @@ public class UserModel {
 
     public static List<User> selectAll() {
         try {
-            FileReader fStream = new FileReader("/home/ahmed/IdeaProjects/Data/data.txt");
+            FileReader fStream = new FileReader("./Data/users.txt");
             BufferedReader br = new BufferedReader(fStream);
             List<User> users = new ArrayList<>();
             String line;
@@ -42,10 +47,24 @@ public class UserModel {
         }
     }
 
+    public static String saveImageToDisk(Image userImage) {
+        File dataFile = new File("./Captured");
+        dataFile.mkdir();
+        int id = UserModel.getLastUserId()+1;
+        File outputFile = new File("./Captured/user_image"+id+".png");
+        BufferedImage bImage = SwingFXUtils.fromFXImage(userImage, null);
+        try {
+            ImageIO.write(bImage, "png", outputFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return outputFile.getAbsolutePath();
+    }
+
     public static int getLastUserId() {
         FileReader fStream;
         try {
-            fStream = new FileReader("/home/ahmed/IdeaProjects/Data/data.txt");
+            fStream = new FileReader("./Data/users.txt");
             BufferedReader br = new BufferedReader(fStream);
 
             String index="0", line;
