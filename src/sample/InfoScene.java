@@ -93,8 +93,6 @@ public class InfoScene{
 
         title = new Label("USER INFO");
 
-
-
         name_label = new Label("Name: ");
         name = new TextField();
 
@@ -127,24 +125,14 @@ public class InfoScene{
 
     private void saveInfo() {
 
-        String photoPath = saveImageToDisk();
+        String photoPath = UserModel.saveImageToDisk(userImage);
         user = new User(name.getText(), address.getText(), password.getText(), phone.getText(), photoPath);
         UserModel.insert(user);
 
 
     }
 
-    private String saveImageToDisk() {
-        int id = UserModel.getLastUserId()+1;
-        File outputFile = new File("/home/ahmed/IdeaProjects/Captured/user_image"+id+".png");
-        BufferedImage bImage = SwingFXUtils.fromFXImage(userImage, null);
-        try {
-            ImageIO.write(bImage, "png", outputFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return outputFile.getAbsolutePath();
-    }
+
 
     public void organizeLayout(){
 
