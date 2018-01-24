@@ -64,6 +64,8 @@ public class UserModel {
     public static int getLastUserId() {
         FileReader fStream;
         try {
+            File dataFile = new File("./Data");
+            dataFile.mkdir();
             fStream = new FileReader("./Data/users.txt");
             BufferedReader br = new BufferedReader(fStream);
 

@@ -20,6 +20,10 @@ import javafx.scene.text.FontWeight;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class NewUser {
     private ImageView cameraScene;
@@ -33,6 +37,8 @@ public class NewUser {
 
     private Scene mainScene;
     private VBox layout;
+
+    ScheduledExecutorService th;
 
     public NewUser(){
         initControls();
@@ -71,34 +77,27 @@ public class NewUser {
     }
 
     private void startWebCamStream() {
-        Task<Void> task = new Task<Void>() {
+        Runnable task = (Runnable) () -> {
 
-            @Override
-            protected Void call(){
+            while (!stopCamera) {
+                try {
+                    if ((grabbedImage = webcam.getImage()) != null) {
 
-                while (!stopCamera) {
-                    try {
-                        if ((grabbedImage = webcam.getImage()) != null) {
+                        Platform.runLater(() -> {
+                            Image mainImage = SwingFXUtils.toFXImage(grabbedImage, null);
+                            imageProperty.set(mainImage);
+                        });
 
-                            Platform.runLater(() -> {
-                                Image mainImage = SwingFXUtils.toFXImage(grabbedImage, null);
-                                imageProperty.set(mainImage);
-                            });
-
-                            grabbedImage.flush();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        grabbedImage.flush();
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                return null;
             }
         };
 
-        Thread th = new Thread(task);
-        th.setDaemon(true);
-        th.start();
+        th = Executors.newSingleThreadScheduledExecutor();
+        th.scheduleAtFixedRate(task,0,33, TimeUnit.MILLISECONDS);
         cameraScene.imageProperty().bind(imageProperty);
     }
 
@@ -155,6 +154,12 @@ public class NewUser {
     private void takePhoto() {
         stopCamera = true;
         reset.setDisable(false);
+        th.shutdown();
+        try {
+            th.awaitTermination(33, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         webcam.close();
 
         if(capture.getText().equals("CAPTURE")) {
