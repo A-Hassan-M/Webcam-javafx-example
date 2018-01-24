@@ -77,9 +77,9 @@ public class NewUser {
     }
 
     private void startWebCamStream() {
-        Runnable task = (Runnable) () -> {
+        Runnable task = () -> {
 
-            while (!stopCamera) {
+            if (!stopCamera) {
                 try {
                     if ((grabbedImage = webcam.getImage()) != null) {
 
